@@ -26,6 +26,10 @@ func Diff(origin, target []Cell) {
 				continue
 			}
 
+			if strings.HasPrefix(trimed, "...") {
+				continue
+			}
+
 			fmt.Println(s)
 		}
 	}
