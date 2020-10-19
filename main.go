@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"sync"
 
 	"github.com/alecthomas/kingpin"
 	"github.com/guromityan/go-diffex/internal"
@@ -31,14 +31,14 @@ func main() {
 		return
 	}
 
-	origin, err := internal.ReadExcelBook(*originFile)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	target, _ := internal.ReadExcelBook(*targeFile)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	origin := make(chan []internal.Cell, 1)
+	target := make(chan []internal.Cell, 1)
+	go internal.ReadExcelBook(&wg, origin, *originFile)
+	go internal.ReadExcelBook(&wg, target, *targeFile)
+	wg.Wait()
 
 	internal.Diff(origin, target)
 }

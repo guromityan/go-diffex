@@ -1,7 +1,8 @@
 package internal
 
 import (
-	"fmt"
+	"log"
+	"sync"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 )
@@ -18,13 +19,14 @@ func NewCell(sheet string, col, row int, val string) Cell {
 	return cell
 }
 
-func ReadExcelBook(filename string) ([]Cell, error) {
+func ReadExcelBook(wg *sync.WaitGroup, readCells chan []Cell, filename string) {
 	cells := []Cell{}
 
 	f, err := excelize.OpenFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("Cloud not open %v: %v", filename, err)
+		log.Fatalln(err)
 	}
+
 	for _, sheet := range f.GetSheetList() {
 		rows, _ := f.GetRows(sheet)
 		for r, row := range rows {
@@ -35,5 +37,6 @@ func ReadExcelBook(filename string) ([]Cell, error) {
 		}
 	}
 
-	return cells, nil
+	readCells <- cells
+	wg.Done()
 }

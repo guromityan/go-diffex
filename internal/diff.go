@@ -8,8 +8,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Diff(origin, target []Cell) {
-	if diff := cmp.Diff(origin, target); diff != "" {
+func Diff(origin, target chan []Cell) {
+	if diff := cmp.Diff(<-origin, <-target); diff != "" {
 		for _, s := range strings.Split(diff, "\n") {
 			if strings.HasPrefix(s, "+") {
 				color.Green("%v", s)
